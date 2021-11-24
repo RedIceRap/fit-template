@@ -5,8 +5,6 @@ import { KeycloakService } from 'keycloak-angular';
   providedIn: 'root',
 })
 export class AuthService {
-  private config: any;
-
   constructor(private keycloak: KeycloakService) {}
 
   getLoggedUser() {
@@ -21,6 +19,10 @@ export class AuthService {
     }
   }
 
+  login() {
+    this.keycloak.login();
+  }
+
   logout() {
     this.keycloak.logout();
   }
@@ -30,6 +32,9 @@ export class AuthService {
   }
 
   getRoles(): string[] {
-    return this.keycloak.getUserRoles();
+    const roles = this.keycloak.getUserRoles();
+    console.log(roles);
+
+    return roles;
   }
 }
