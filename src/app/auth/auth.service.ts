@@ -1,17 +1,31 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { KeycloakService } from 'keycloak-angular';
+import { KeycloakEventType, KeycloakService } from 'keycloak-angular';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(private keycloak: KeycloakService) {}
+  constructor(
+    private http: HttpClient,
+    private keycloakService: KeycloakService
+  ) {
+    this.keycloakService.keycloakEvents$.subscribe({
+      next: (e) => {
+        console.log(e);
+        if (e.type == KeycloakEventType.OnTokenExpired) {
+          this.keycloakService.updateToken(20);
+        }
+      },
+    });
+  }
 
   getLoggedUser() {
     try {
-      let userDetails = this.keycloak.getKeycloakInstance().idTokenParsed;
+      let userDetails =
+        this.keycloakService.getKeycloakInstance().idTokenParsed;
       console.log('UserDetails', userDetails);
-      console.log('UserRoles', this.keycloak.getUserRoles());
+      console.log('UserRoles', this.keycloakService.getUserRoles());
       return userDetails;
     } catch (e) {
       console.log('getLoggedUser Exception', e);
@@ -20,21 +34,29 @@ export class AuthService {
   }
 
   login() {
-    this.keycloak.login();
+    this.keycloakService.login();
   }
 
   logout() {
-    this.keycloak.logout();
+    this.keycloakService.logout();
   }
 
   redirectToProfile() {
-    this.keycloak.getKeycloakInstance().accountManagement();
+    this.keycloakService.getKeycloakInstance().accountManagement();
   }
 
-  getRoles(): string[] {
-    const roles = this.keycloak.getUserRoles();
+  getUserRoles(): string[] {
+    const roles = this.keycloakService.getUserRoles();
     console.log(roles);
 
     return roles;
+  }
+
+  getToken() {
+    return this.keycloakService.getToken();
+  }
+
+  testGetRequest() {
+    return this.http.get('https://httpbin.org/get');
   }
 }
