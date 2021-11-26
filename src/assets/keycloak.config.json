@@ -1,0 +1,5 @@
+{
+  "clientId": "frontend",
+  "realm": "Test",
+  "url": "http://localhost:8080/auth"
+}
