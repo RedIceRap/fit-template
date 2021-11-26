@@ -1,23 +1,46 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { KeycloakEventType, KeycloakService } from 'keycloak-angular';
+import { BehaviorSubject, Subscriber, Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  keycloakIsDown$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    false
+  );
+  keycloakEvents$: Subscription = new Subscription();
+
   constructor(
     private http: HttpClient,
     private keycloakService: KeycloakService
   ) {
-    this.keycloakService.keycloakEvents$.subscribe({
-      next: (e) => {
-        console.log(e);
-        if (e.type == KeycloakEventType.OnTokenExpired) {
-          this.keycloakService.updateToken(20);
-        }
-      },
-    });
+    // TODO: thats probably not the correct way
+    if (!(this.keycloakEvents$ instanceof Subscriber)) {
+      this.keycloakEvents$ = this.keycloakService.keycloakEvents$.subscribe({
+        next: (event) => {
+          if (event.type == KeycloakEventType.OnAuthError) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnAuthLogout) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnAuthRefreshError) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnAuthRefreshSuccess) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnReady) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnTokenExpired) {
+            this.keycloakService.updateToken(20);
+          }
+        },
+      });
+    }
   }
 
   getLoggedUser() {
