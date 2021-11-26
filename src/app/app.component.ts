@@ -11,7 +11,6 @@ import { AuthService } from './auth/auth.service';
 export class AppComponent implements OnInit, OnDestroy {
   title: string = 'fit-template';
   destroy$: Subject<void> = new Subject<void>();
-  onTestGetRequest$: Subject<void> = new Subject<void>();
 
   constructor(private authService: AuthService) {}
 

@@ -7,7 +7,8 @@ import {
 } from 'keycloak-angular';
 import { KeycloakTokenParsed } from 'keycloak-js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
+import { SharedService } from '../shared/shared.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,11 +16,18 @@ import { take } from 'rxjs/operators';
 export class AuthService {
   private currentUserSource$: BehaviorSubject<KeycloakTokenParsed | undefined> =
     new BehaviorSubject<KeycloakTokenParsed | undefined>(this.getCurrentUser());
-  currentUser$ = this.currentUserSource$.asObservable();
+  currentUser$ = this.currentUserSource$.asObservable().pipe(
+    map((currentUser) => {
+      this.sharedService.log('authService.currentUser$');
+      return currentUser;
+    })
+  );
   set currentUser(user: KeycloakTokenParsed | undefined) {
+    this.sharedService.log('set authService.currentUser');
     this.currentUserSource$.next(this.getCurrentUser());
   }
   get currentUser(): KeycloakTokenParsed | undefined {
+    this.sharedService.log('get authService.currentUser');
     return this.getCurrentUser();
   }
 
@@ -27,7 +35,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private keycloakService: KeycloakService
+    private keycloakService: KeycloakService,
+    private sharedService: SharedService
   ) {
     this.startKeycloakEventsSub();
   }
@@ -87,13 +96,11 @@ export class AuthService {
 
   getUserRoles(): string[] {
     const roles = this.keycloakService.getUserRoles();
-    console.log(roles);
     return roles;
   }
 
   async getToken(): Promise<string> {
     const token = await this.keycloakService?.getToken();
-    console.log(token);
     return token;
   }
 

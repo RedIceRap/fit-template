@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  logging: true,
   keycloakConfig: {
     clientId: 'frontend',
     realm: 'Test',
