@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { KeycloakEventType, KeycloakService } from 'keycloak-angular';
 import { Subject } from 'rxjs';
 import { exhaustMap, mergeMap, takeUntil } from 'rxjs/operators';
 import { AuthService } from './auth/auth.service';
@@ -14,16 +15,50 @@ export class AppComponent implements OnInit, OnDestroy {
   onTestGetRequest$: Subject<void> = new Subject<void>();
   onGetToken$: Subject<void> = new Subject<void>();
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private keycloakService: KeycloakService
+  ) {}
 
   ngOnInit() {
-    this.onTestGetRequest$
-      .pipe(
-        exhaustMap(() => this.authService.testGetRequest()),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(console.log, console.error, () => 'testGetRequest complete!');
+    this.startKeycloakEventsSub();
+    this.startGetTokenSub();
+    this.startTestGetRequestSub();
+  }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  startKeycloakEventsSub(): void {
+    this.keycloakService.keycloakEvents$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (event) => {
+          if (event.type == KeycloakEventType.OnAuthError) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnAuthLogout) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnAuthRefreshError) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnAuthRefreshSuccess) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnReady) {
+            console.log(event);
+          }
+          if (event.type == KeycloakEventType.OnTokenExpired) {
+            this.keycloakService.updateToken(20);
+          }
+        },
+      });
+  }
+
+  startGetTokenSub(): void {
     this.onGetToken$
       .pipe(
         mergeMap(() => this.authService.getToken()),
@@ -32,9 +67,13 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(console.log, console.error, () => 'getToken complete!');
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  startTestGetRequestSub(): void {
+    this.onTestGetRequest$
+      .pipe(
+        exhaustMap(() => this.authService.testGetRequest()),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(console.log, console.error, () => 'testGetRequest complete!');
   }
 
   onLogin() {
