@@ -1,5 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { KeycloakEventType, KeycloakService } from 'keycloak-angular';
+import {
+  KeycloakEvent,
+  KeycloakEventType,
+  KeycloakService,
+} from 'keycloak-angular';
 import { Subject } from 'rxjs';
 import { exhaustMap, mergeMap, takeUntil } from 'rxjs/operators';
 import { AuthService } from './auth/auth.service';
@@ -10,7 +14,7 @@ import { AuthService } from './auth/auth.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'fit-template';
+  title: string = 'fit-template';
   destroy$: Subject<void> = new Subject<void>();
   onTestGetRequest$: Subject<void> = new Subject<void>();
   onGetToken$: Subject<void> = new Subject<void>();
@@ -35,7 +39,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.keycloakService.keycloakEvents$
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (event) => {
+        next: (event: KeycloakEvent) => {
           if (event.type == KeycloakEventType.OnAuthError) {
             console.log(event);
           }
@@ -76,19 +80,19 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(console.log, console.error, () => 'testGetRequest complete!');
   }
 
-  onLogin() {
+  onLogin(): void {
     this.authService.login();
   }
 
-  onLogout() {
+  onLogout(): void {
     this.authService.logout();
   }
 
-  onGetRoles() {
+  onGetRoles(): void {
     this.authService.getUserRoles();
   }
 
-  onGetLoggedUser() {
+  onGetLoggedUser(): void {
     this.authService.getLoggedUser();
   }
 }
