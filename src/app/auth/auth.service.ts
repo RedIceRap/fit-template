@@ -7,7 +7,7 @@ import {
 } from 'keycloak-angular';
 import { KeycloakTokenParsed } from 'keycloak-js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take, tap } from 'rxjs/operators';
 import { SharedService } from '../shared/shared.service';
 
 @Injectable({
@@ -42,36 +42,37 @@ export class AuthService {
   }
 
   startKeycloakEventsSub(): void {
-    this.keycloakEventsSub$.unsubscribe();
-    this.keycloakEventsSub$ = this.keycloakService.keycloakEvents$.subscribe({
-      next: (event: KeycloakEvent) => {
-        // if (event.type == KeycloakEventType.OnAuthError) {
-        //   this.setCurrentUser();
-        // }
-        // if (event.type == KeycloakEventType.OnAuthLogout) {
-        //   this.setCurrentUser();
-        // }
-        // if (event.type == KeycloakEventType.OnAuthRefreshError) {
-        //   this.setCurrentUser();
-        // }
-        // if (event.type == KeycloakEventType.OnAuthRefreshSuccess) {
-        //   this.setCurrentUser();
-        // }
-        // if (event.type == KeycloakEventType.OnReady) {
-        //   this.setCurrentUser();
-        // }
-        if (event.type == KeycloakEventType.OnTokenExpired) {
-          this.keycloakService.updateToken(20);
-          // this.setCurrentUser();
-        }
+    this.keycloakEventsSub$ = this.keycloakService.keycloakEvents$
+      .pipe(
+        tap((event: KeycloakEvent) => {
+          // if (event.type == KeycloakEventType.OnAuthError) {
+          //   this.setCurrentUser();
+          // }
+          // if (event.type == KeycloakEventType.OnAuthLogout) {
+          //   this.setCurrentUser();
+          // }
+          // if (event.type == KeycloakEventType.OnAuthRefreshError) {
+          //   this.setCurrentUser();
+          // }
+          // if (event.type == KeycloakEventType.OnAuthRefreshSuccess) {
+          //   this.setCurrentUser();
+          // }
+          // if (event.type == KeycloakEventType.OnReady) {
+          //   this.setCurrentUser();
+          // }
+          if (event.type == KeycloakEventType.OnTokenExpired) {
+            this.keycloakService.updateToken(20);
+            // this.setCurrentUser();
+          }
 
-        this.setCurrentUser();
-      },
-    });
+          this.setCurrentUser();
+        })
+      )
+      .subscribe();
   }
 
-  login(): void {
-    this.keycloakService.login();
+  async login(): Promise<void> {
+    await this.keycloakService.login();
   }
 
   async logout(): Promise<void> {
@@ -86,7 +87,7 @@ export class AuthService {
     this.currentUser = this.getCurrentUser();
   }
 
-  getCurrentUser() {
+  getCurrentUser(): KeycloakTokenParsed | undefined {
     return this.keycloakService.getKeycloakInstance().idTokenParsed;
   }
 
@@ -100,7 +101,14 @@ export class AuthService {
   }
 
   async getToken(): Promise<string> {
-    const token = await this.keycloakService?.getToken();
+    let token: string;
+
+    try {
+      token = await this.keycloakService?.getToken();
+    } catch (e) {
+      throw new Error('You are not logged in.');
+    }
+
     return token;
   }
 

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { from, of, Subject } from 'rxjs';
+import { catchError, takeUntil, tap } from 'rxjs/operators';
 import { AuthService } from './auth/auth.service';
 
 @Component({
@@ -16,6 +16,17 @@ export class AppComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.authService.setCurrentUser();
+    from(this.authService.getToken())
+      .pipe(
+        tap(console.log),
+        catchError(() => {
+          console.log('Something went wrong');
+          return of(null);
+        }),
+
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
   }
 
   ngOnDestroy() {
@@ -23,8 +34,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  async onGetToken() {
-    await this.authService.getToken();
+  onGetToken(): Promise<string> {
+    return this.authService.getToken();
   }
 
   onClearToken() {

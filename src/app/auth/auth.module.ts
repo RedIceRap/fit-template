@@ -18,8 +18,9 @@ const initializeKeycloak = (keycloak: KeycloakService) => {
         initOptions: {
           onLoad: 'check-sso',
           silentCheckSsoRedirectUri:
+            // window.location.href.endsWith('/')  ? '' :
             window.location.origin + '/assets/silent-check-sso.html',
-          // checkLoginIframe: false,
+          checkLoginIframe: false,
         },
         enableBearerInterceptor: true,
         bearerPrefix: 'Bearer',
