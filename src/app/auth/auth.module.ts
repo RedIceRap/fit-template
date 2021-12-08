@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
-import { KeycloakService } from 'keycloak-angular';
+import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
 import { of } from 'rxjs';
 import * as keycloakConfig from 'src/assets/keycloak.config.json';
-import { AuthService } from './auth.service';
+import { SharedModule } from '../shared/shared.module';
+import { AuthService } from './services/auth/auth.service';
 
 const initializeKeycloak = (keycloak: KeycloakService) => {
   const { realm, url, clientId } = keycloakConfig;
@@ -34,7 +34,7 @@ const initializeKeycloak = (keycloak: KeycloakService) => {
 
 @NgModule({
   declarations: [],
-  imports: [CommonModule],
+  imports: [KeycloakAngularModule, SharedModule],
   providers: [
     AuthService,
     {

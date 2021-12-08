@@ -1,0 +1,11 @@
+<mat-drawer-container [hasBackdrop]="true">
+  <mat-drawer
+    (openedChange)="onOpenedChange($event)"
+    [opened]="drawerState$ | async"
+    [mode]="'over'"
+    >I'm a drawer</mat-drawer
+  >
+  <mat-drawer-content>
+    <app-mat-toolbar></app-mat-toolbar>
+  </mat-drawer-content>
+</mat-drawer-container>

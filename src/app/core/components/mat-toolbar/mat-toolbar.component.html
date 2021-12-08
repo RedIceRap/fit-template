@@ -1,0 +1,14 @@
+<mat-toolbar fxLayoutAlign="space-between center">
+  <button
+    mat-icon-button
+    aria-label="Icon-button with menu icon"
+    (click)="onToggleDrawer()"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+  <ng-container *ngIf="{ currentUser: currentUser$ | async } as o">
+    <button mat-raised-button (click)="!o.currentUser ? onLogin() : onLogout()">
+      {{ !o.currentUser ? "Login" : o.currentUser.preferred_username }}
+    </button>
+  </ng-container>
+</mat-toolbar>

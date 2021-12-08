@@ -7,11 +7,8 @@ import { environment } from 'src/environments/environment';
 export class SharedService {
   constructor() {}
 
-  log(value: any, production = false): void {
-    if (
-      environment.logging &&
-      ((!production && !environment.production) || production)
-    ) {
+  log(value: any): void {
+    if (environment.logging) {
       console.log(value);
     }
   }
