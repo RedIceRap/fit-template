@@ -6,8 +6,8 @@ import {
 } from 'keycloak-angular';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { EUserRoles } from '../../enums/user-roles.enum';
-import { IKeycloakTokenParsed } from '../../interfaces/keycloak-token-parsed.interface';
+import { EUserRoles } from '../enums/user-roles.enum';
+import { IKeycloakTokenParsed } from '../interfaces/keycloak-token-parsed.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -23,8 +23,6 @@ export class AuthService {
   userRoles$: Observable<EUserRoles[]> = this.userRolesSource$;
 
   constructor(private keycloakService: KeycloakService) {
-    this.setCurrentUser(this.getKeycloakUser());
-    this.setUserRoles(this.getKeycloakRoles());
     this.keycloakEvents$().subscribe();
   }
 
@@ -75,7 +73,7 @@ export class AuthService {
     await this.keycloakService.logout();
   }
 
-  clearKeycloakToken(): void {
+  clearKeycloakToken() {
     this.keycloakService.clearToken();
   }
 

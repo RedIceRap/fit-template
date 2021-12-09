@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '@app/auth/services/auth.service';
+import { IKeycloakTokenParsed } from 'app/auth/interfaces/keycloak-token-parsed.interface';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
-import { IKeycloakTokenParsed } from 'src/app/auth/interfaces/keycloak-token-parsed.interface';
-import { AuthService } from 'src/app/auth/services/auth/auth.service';
-import { CoreService } from '../../services/core/core.service';
+import { CoreService } from '../../services/core.service';
 
 @Component({
   selector: 'app-mat-toolbar',

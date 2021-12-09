@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { CoreService } from '@core/services/core.service';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
-import { CoreService } from '../../services/core/core.service';
 
 @Component({
   selector: 'app-mat-drawer',
