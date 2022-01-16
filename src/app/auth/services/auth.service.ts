@@ -15,10 +15,10 @@ import { IKeycloakTokenParsed } from '../interfaces/keycloak-token-parsed.interf
   providedIn: 'root',
 })
 export class AuthService {
-  private currentUserSource$ = new BehaviorSubject<
-    IKeycloakTokenParsed | undefined
-  >(undefined);
-  currentUser$: Observable<IKeycloakTokenParsed | undefined> =
+  private currentUserSource$ = new BehaviorSubject<IKeycloakTokenParsed | null>(
+    null
+  );
+  currentUser$: Observable<IKeycloakTokenParsed | null> =
     this.currentUserSource$;
 
   private userRolesSource$ = new BehaviorSubject<Array<EUserRoles>>([]);
@@ -31,10 +31,11 @@ export class AuthService {
     this.oKeycloakEvents$().subscribe();
   }
 
-  setCurrentUser(user: IKeycloakTokenParsed | undefined) {
+  setCurrentUser(user: IKeycloakTokenParsed | null) {
+    this.setUserRoles(this.getKeycloakRoles());
     this.currentUserSource$.next(user);
   }
-  getCurrentUser(): IKeycloakTokenParsed | undefined {
+  getCurrentUser(): IKeycloakTokenParsed | null {
     return this.currentUserSource$.getValue();
   }
 
@@ -86,14 +87,22 @@ export class AuthService {
     this.keycloakService.clearToken();
   }
 
-  getKeycloakUser(): IKeycloakTokenParsed | undefined {
-    return this.keycloakService.getKeycloakInstance().idTokenParsed as
+  getKeycloakUser(): IKeycloakTokenParsed | null {
+    const user = this.keycloakService.getKeycloakInstance().idTokenParsed as
       | IKeycloakTokenParsed
       | undefined;
+
+    if (user) {
+      return user;
+    } else {
+      return null;
+    }
   }
 
   getKeycloakRoles(): Array<EUserRoles> {
-    return this.keycloakService.getUserRoles() as Array<EUserRoles>;
+    const roles = this.keycloakService.getUserRoles() as Array<EUserRoles>;
+
+    return roles;
   }
 
   async getKeycloakToken(): Promise<string> {

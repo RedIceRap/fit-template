@@ -24,7 +24,6 @@ const initializeKeycloak = (
 
     if (authenticated) {
       authService.setCurrentUser(authService.getKeycloakUser());
-      authService.setUserRoles(authService.getKeycloakRoles());
     }
 
     return authenticated;
