@@ -1,9 +1,11 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   KeycloakEvent,
   KeycloakEventType,
   KeycloakService,
 } from 'keycloak-angular';
+import { KeycloakConfig } from 'keycloak-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { EUserRoles } from '../enums/user-roles.enum';
@@ -22,8 +24,11 @@ export class AuthService {
   private userRolesSource$ = new BehaviorSubject<Array<EUserRoles>>([]);
   userRoles$: Observable<EUserRoles[]> = this.userRolesSource$;
 
-  constructor(private keycloakService: KeycloakService) {
-    this.keycloakEvents$().subscribe();
+  constructor(
+    private http: HttpClient,
+    private keycloakService: KeycloakService
+  ) {
+    this.oKeycloakEvents$().subscribe();
   }
 
   setCurrentUser(user: IKeycloakTokenParsed | undefined) {
@@ -40,7 +45,7 @@ export class AuthService {
     return this.userRolesSource$.getValue();
   }
 
-  keycloakEvents$(): Observable<KeycloakEvent> {
+  oKeycloakEvents$(): Observable<KeycloakEvent> {
     return this.keycloakService.keycloakEvents$.pipe(
       tap((event: KeycloakEvent) => {
         // if (event.type == KeycloakEventType.OnAuthError) {
@@ -65,6 +70,10 @@ export class AuthService {
     );
   }
 
+  getKeycloakConfig(): Observable<KeycloakConfig> {
+    return this.http.get<KeycloakConfig>('/assets/keycloak.config.json');
+  }
+
   async redirectToKeycloakLogin(): Promise<void> {
     await this.keycloakService.login();
   }
@@ -78,26 +87,17 @@ export class AuthService {
   }
 
   getKeycloakUser(): IKeycloakTokenParsed | undefined {
-    return this.keycloakService.getKeycloakInstance()
-      .idTokenParsed as IKeycloakTokenParsed;
+    return this.keycloakService.getKeycloakInstance().idTokenParsed as
+      | IKeycloakTokenParsed
+      | undefined;
   }
 
   getKeycloakRoles(): Array<EUserRoles> {
     return this.keycloakService.getUserRoles() as Array<EUserRoles>;
   }
 
-  async redirectToKeycloakProfile(): Promise<void> {
-    await this.keycloakService.getKeycloakInstance().accountManagement();
-  }
-
   async getKeycloakToken(): Promise<string> {
-    let token: string;
-
-    try {
-      token = await this.keycloakService.getToken();
-    } catch (e) {
-      token = '';
-    }
+    const token = await this.keycloakService.getToken().catch((e) => '');
 
     return token;
   }
