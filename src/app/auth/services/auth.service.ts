@@ -8,7 +8,7 @@ import {
 import { KeycloakConfig } from 'keycloak-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { EUserRoles } from '../enums/user-roles.enum';
+import { EUserRole } from '../enums/user-roles.enum';
 import { IKeycloakTokenParsed } from '../interfaces/keycloak-token-parsed.interface';
 
 @Injectable({
@@ -21,8 +21,8 @@ export class AuthService {
   currentUser$: Observable<IKeycloakTokenParsed | null> =
     this.currentUserSource$;
 
-  private userRolesSource$ = new BehaviorSubject<Array<EUserRoles>>([]);
-  userRoles$: Observable<EUserRoles[]> = this.userRolesSource$;
+  private userRolesSource$ = new BehaviorSubject<Array<EUserRole>>([]);
+  userRoles$: Observable<EUserRole[]> = this.userRolesSource$;
 
   constructor(
     private http: HttpClient,
@@ -39,11 +39,25 @@ export class AuthService {
     return this.currentUserSource$.getValue();
   }
 
-  setUserRoles(roles: Array<EUserRoles>) {
+  setUserRoles(roles: Array<EUserRole>) {
     this.userRolesSource$.next(roles);
   }
-  getUserRoles(): Array<EUserRoles> {
+  getUserRoles(): Array<EUserRole> {
     return this.userRolesSource$.getValue();
+  }
+  addUserRole(role: EUserRole) {
+    this.userRolesSource$.next([...this.getUserRoles(), role]);
+  }
+  removeUserRole(role: EUserRole) {
+    this.userRolesSource$.next(
+      this.getUserRoles().filter((r: EUserRole) => r !== role)
+    );
+  }
+  hasRole(role: EUserRole): boolean {
+    return this.getUserRoles().includes(role);
+  }
+  hasRegisteredRole(): boolean {
+    return this.getUserRoles().includes(EUserRole.Registered);
   }
 
   oKeycloakEvents$(): Observable<KeycloakEvent> {
@@ -76,11 +90,11 @@ export class AuthService {
   }
 
   async redirectToKeycloakLogin(): Promise<void> {
-    await this.keycloakService.login();
+    return this.keycloakService.login();
   }
 
   async logout(): Promise<void> {
-    await this.keycloakService.logout();
+    return this.keycloakService.logout();
   }
 
   clearKeycloakToken() {
@@ -99,14 +113,14 @@ export class AuthService {
     }
   }
 
-  getKeycloakRoles(): Array<EUserRoles> {
-    const roles = this.keycloakService.getUserRoles() as Array<EUserRoles>;
+  getKeycloakRoles(): Array<EUserRole> {
+    const roles = this.keycloakService.getUserRoles() as Array<EUserRole>;
 
     return roles;
   }
 
   async getKeycloakToken(): Promise<string> {
-    const token = await this.keycloakService.getToken().catch((e) => '');
+    const token = await this.keycloakService.getToken().catch(() => '');
 
     return token;
   }
